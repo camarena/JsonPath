@@ -14,21 +14,30 @@
  */
 package com.jayway.jsonpath.spi;
 
-import com.jayway.jsonpath.spi.impl.JsonSmartJsonProvider;
-
 /**
  * @author Kalle Stenflo
  */
 public abstract class JsonProviderFactory {
 
-    private static JsonProvider provider = new JsonSmartJsonProvider();
+	private static String providerClassName = "com.jayway.jsonpath.spi.impl.JsonSmartJsonProvider";
+	private static class JsonProviderSingleton{
+	    private static JsonProvider provider;
+		static {
+			try {
+				final Class<?> aClass = Class.forName(providerClassName);
+				provider = (JsonProvider) aClass.newInstance();
+			} catch (Exception e) {
+				throw new RuntimeException("Factory not configured properly.",e);
+			}
+		}
+	}
 
     public static JsonProvider createProvider() {
-        return provider;
+        return JsonProviderSingleton.provider;
     }
 
-    public static synchronized void setProvider(JsonProvider jsonProvider) {
-        provider = jsonProvider;
+    public static synchronized void setProvider(final String jsonProviderClassName) {
+		providerClassName = jsonProviderClassName;
     }
 
 
